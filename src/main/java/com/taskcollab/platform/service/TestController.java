@@ -17,4 +17,8 @@ public class TestController {
     public String hello() {
         return "hello from task";
     }
+    @GetMapping("/protected")
+public String protectedEndpoint() {
+    return "protected endpoint!";
+}
 }
