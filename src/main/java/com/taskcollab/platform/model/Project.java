@@ -7,6 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "projects")
+
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,11 +18,11 @@ public class Project {
     
     private String description;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
     
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE}) 
     @JoinTable(
         name = "project_members",
         joinColumns = @JoinColumn(name = "project_id"),
@@ -29,10 +30,11 @@ public class Project {
     )
     private List<User> members = new ArrayList<>();
     
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
     
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     
     // Constructeurs
     public Project() {}
@@ -42,6 +44,18 @@ public class Project {
         this.description = description;
         this.owner = owner;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
     
     // Getters et Setters
@@ -65,4 +79,22 @@ public class Project {
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    // Méthodes utilitaires
+    public void addMember(User user) {
+        if (!members.contains(user)) {
+            members.add(user);
+        }
+    }
+    
+    public void removeMember(User user) {
+        members.remove(user);
+    }
+    
+    public boolean isMember(User user) {
+        return members.contains(user) || owner.equals(user);
+    }
 }
