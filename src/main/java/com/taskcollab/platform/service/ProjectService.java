@@ -106,21 +106,25 @@ public class ProjectService {
     
     // Gestion des membres
     
-    public Project inviteMemberByEmail(Long projectId, String memberEmail, String requesterEmail) {
-        User requester = getUserByEmail(requesterEmail);
-        Project project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new RuntimeException("Project not found"));
-        
-        // Seul l'owner ou un membre peut inviter d'autres membres
-        if (!isUserOwnerOrMember(project, requester)) {
-            throw new RuntimeException("You don't have permission to invite members to this project");
-        }
-        
-        User userToInvite = userRepository.findByEmail(memberEmail)
-            .orElseThrow(() -> new RuntimeException("User with email " + memberEmail + " not found"));
-        
-        return addMemberToProject(projectId, userToInvite.getId(), requesterEmail);
+   @Autowired
+private InvitationService invitationService;
+
+public Project inviteMemberByEmail(Long projectId, String memberEmail, String requesterEmail) {
+    User requester = getUserByEmail(requesterEmail);
+    Project project = projectRepository.findById(projectId)
+        .orElseThrow(() -> new RuntimeException("Project not found"));
+    
+    // Seul l'owner ou un membre peut inviter d'autres membres
+    if (!isUserOwnerOrMember(project, requester)) {
+        throw new RuntimeException("You don't have permission to invite members to this project");
     }
+    
+    // Créer une invitation au lieu d'ajouter directement
+    invitationService.createInvitation(projectId, memberEmail, requesterEmail);
+    
+    // Retourner le projet (sans ajouter le membre)
+    return project;
+}
     
     public Project addMemberToProject(Long projectId, Long userId, String requesterEmail) {
         User requester = getUserByEmail(requesterEmail);

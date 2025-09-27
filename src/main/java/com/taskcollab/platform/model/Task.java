@@ -2,6 +2,7 @@ package com.taskcollab.platform.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat; 
 
 @Entity
 @Table(name = "tasks")
@@ -12,8 +13,16 @@ public class Task {
     
     @Column(nullable = false)
     private String title;
-    
+
     private String description;
+
+    // UNE SEULE déclaration de createdAt
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
+    
+    // UNE SEULE déclaration de dueDate
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dueDate;
     
     @Enumerated(EnumType.STRING)
     private TaskStatus status = TaskStatus.TODO;
@@ -26,11 +35,13 @@ public class Task {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
     
-    private LocalDateTime createdAt;
-    private LocalDateTime dueDate;
+    // SUPPRIMER ces lignes dupliquées :
+    // private LocalDateTime createdAt; ← SUPPRIMER
+    // private LocalDateTime dueDate;   ← SUPPRIMER
     
-    // Constructeurs
-    public Task() {}
+    public Task() {
+        this.createdAt = LocalDateTime.now();
+    }
     
     public Task(String title, String description, Project project) {
         this.title = title;
