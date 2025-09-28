@@ -3,6 +3,8 @@ package com.taskcollab.platform.model;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat; 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "tasks")
@@ -15,12 +17,10 @@ public class Task {
     private String title;
 
     private String description;
-
-    // UNE SEULE déclaration de createdAt
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     
-    // UNE SEULE déclaration de dueDate
+ 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dueDate;
     
@@ -31,6 +31,7 @@ public class Task {
     @JoinColumn(name = "assignee_id")
     private User assignee;
     
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -50,7 +51,7 @@ public class Task {
         this.createdAt = LocalDateTime.now();
     }
     
-    // Getters et Setters
+   
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
