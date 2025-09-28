@@ -217,6 +217,50 @@ public class TaskService {
         }
         return allTasks;
     }
+
+
+
+    // Ajoutez ces méthodes dans TaskService.java, avant la dernière accolade fermante
+
+public Task assignTaskToMember(Long taskId, Long memberId, String email) {
+    User requester = getUserByEmail(email);
+    Task task = taskRepository.findById(taskId)
+        .orElseThrow(() -> new RuntimeException("Tâche non trouvée"));
+    
+    Project project = task.getProject();
+    
+    // Vérifier que le requester est bien le propriétaire du projet
+    if (!project.getOwner().getId().equals(requester.getId())) {
+        throw new RuntimeException("Seul le propriétaire du projet peut assigner des tâches");
+    }
+    
+    User memberToAssign = userRepository.findById(memberId)
+        .orElseThrow(() -> new RuntimeException("Membre non trouvé"));
+    
+    // Vérifier que le membre fait bien partie du projet
+    if (!project.isMember(memberToAssign) && !project.getOwner().getId().equals(memberToAssign.getId())) {
+        throw new RuntimeException("L'utilisateur n'est pas membre de ce projet");
+    }
+    
+    task.setAssignee(memberToAssign);
+    return taskRepository.save(task);
+}
+
+public Task unassignTask(Long taskId, String email) {
+    User requester = getUserByEmail(email);
+    Task task = taskRepository.findById(taskId)
+        .orElseThrow(() -> new RuntimeException("Tâche non trouvée"));
+    
+    Project project = task.getProject();
+    
+    // Vérifier que le requester est bien le propriétaire du projet
+    if (!project.getOwner().getId().equals(requester.getId())) {
+        throw new RuntimeException("Seul le propriétaire du projet peut désassigner des tâches");
+    }
+    
+    task.setAssignee(null);
+    return taskRepository.save(task);
+}
     // Ajoutez cette méthode pour vérifier les permissions des tâches
 private boolean canUserModifyTask(Task task, User user) {
     Project project = task.getProject();
@@ -239,4 +283,7 @@ private boolean canUserModifyTask(Task task, User user) {
     private boolean containsTask(List<Task> tasks, Task task) {
         return tasks.stream().anyMatch(t -> t.getId().equals(task.getId()));
     }
+
+
+    
 }

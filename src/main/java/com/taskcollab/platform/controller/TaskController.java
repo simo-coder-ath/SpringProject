@@ -48,6 +48,25 @@ public class TaskController {
         return ResponseEntity.ok(taskService.assignTask(taskId, userId, email));
     }
     
+    // NOUVEAU ENDPOINT - Assignation réservée au propriétaire
+    @PutMapping("/{taskId}/assign-member/{memberId}")
+    public ResponseEntity<Task> assignTaskToMember(
+            @PathVariable Long taskId, 
+            @PathVariable Long memberId,
+            Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(taskService.assignTaskToMember(taskId, memberId, email));
+    }
+    
+    // NOUVEAU ENDPOINT - Désassignation réservée au propriétaire
+    @PutMapping("/{taskId}/unassign")
+    public ResponseEntity<Task> unassignTask(
+            @PathVariable Long taskId,
+            Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(taskService.unassignTask(taskId, email));
+    }
+    
     @PutMapping("/{taskId}/status")
     public ResponseEntity<Task> updateTaskStatus(@PathVariable Long taskId, @RequestBody TaskStatus status, Authentication authentication) {
         String email = authentication.getName();
